@@ -107,12 +107,184 @@ function paintScore() {
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText("SCORE: " + points, 20, 20);
+}
+paintScore();
 
+//STEP 6 . . MR . . PLACE PADDLES (TOP AND BOTTOM) ON CANVAS 
+
+function paddlePosition(TB){
+    
+    this.w = 150; 
+    this.h = 5; 
+    
+    this.x = W/2 - this.w/2;
+    
+    if (TB == "top"){
+        
+     this.y = 0;
+        }else{
+    this.y = H - this.h;
+        
+    }
+}
+    
+var paddlesArray = []; //PADDLES ARRAY 
+paddlesArray.push(new paddlePosition("top"));
+paddlesArray.push(new paddlePosition("bottom"));
+
+//console.log("top paddle y is: " + paddlesArray[0].y);
+//console.log("bottom paddle y is: " + paddlesArray[1].y);
+
+function paintPaddles(){
+    for (var lp = 0; lp < paddlesArray.length; lp++){
+        p = paddlesArray[lp];
+        
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+    }
 }
 
-paintScore();
+paintPaddles();
+
+//Step 7 . . MR . . DETECT WHEN THE USER CLICKS ON THE SCREEN 
+
+gameCanvas.addEventListener("mousedown", btnClick, true);
+
+function btnClick(evt){
+    var mx = evt.pageX;
+    var my = evt.pageY;
     
     
+   //USER CLICKED ON START BUTTON  
+    if(mx >= startBtn.x && mx <= startBtn.x + startBtn.w){
+        if(my >= startBtn.y && my <= startBtn.y + startBtn.h){
+//            console.log ("Start button clicked");
+            startBtn = {};
+            
+            // start game animation loop 
+            animloop();
+        }
+    }
+}
+
+
+//Function for running the whole game animation 
+var init; //variable to initialize animation 
+function animloop(){
+    init = requestAnimFrame(animloop);
+    refreshCanvasFun();
+}
+
+// STEP 8 . . MR . . DRAW EVERYTHING ON CANVAS OVER AND OVER AGAIN 
+function refreshCanvasFun(){
+    paintCanvas();
+    paintPaddles();
+    ball.draw();
+    paintScore();
+    update();
+}
+function update (){
+    
+    //move the paddles, track the mouse
+    
+    for (var lp = 0; lp < paddlesArray.length; lp++){
+        p = paddlesArray[lp];
+        p.x = mouseObj.x - p.w/2; 
+        
+    }
+    
+    //move the ball 
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    //check for ball paddle collision 
+    check4collision();
+}
+
+function check4collision(){
+    
+    var pTop = paddlesArray[0];
+    var pBot = paddlesArray[1];
+        
+    if(collides(ball, pTop)){
+        collideAction(ball, pTop);   
+        
+    }else if (collides(ball, pBot)){
+        collideAction(ball, pBot);
+    }else {
+        //ball when off the top or bottom of screen 
+        
+        if (ball.y + ball.r >H){
+            
+            // game over
+        }else if (ball.y < 0){
+            //game over 
+        }
+        
+        //ball hits the side of the screen
+        if (ball.x + ball.r > W){
+            
+            ball.vx = -ball.vx;
+            ball.x = W - ball.r;
+        }else if (ball.x - ball.r < 0){
+            ball.vx = -ball.vx;
+            ball.x = ball.r;
+            
+        }
+        
+    }
+        
+}
+
+var paddleHit; // which paddle was hit 0=top, 1=bottom 
+function collides(b, p){
+    if (b.x + b.r >= p.x && b.x -b.r <= p.x + p.w){
+    if (b.y>= (p.y - p.h) && p.y > 0 ){
+        paddleHit = 0; 
+        return true;
+    }else if (b.y <= p.h && p.y === 0){
+        paddleHit = 1;
+        return true; 
+    }else{
+        return false; 
+    }
+     }
+      }
+
+
+var collisionSnd = document.getElementById("collide")
+
+function collideAction(b,p){
+    
+//    console.log ("sound and then bounce");
+    if (collisionSnd){
+        
+    }
+    collisionSnd.play();
+    
+//     reverse ball y velocity 
+    ball.vy = -ball.vy;
+//    increase the score by 1
+    points++; 
+}
+            
+        
+    
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
